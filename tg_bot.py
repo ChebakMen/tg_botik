@@ -79,7 +79,7 @@ def handle_option(message):
         markup.row('Ввести код', 'Дальше', 'Назад')
         bot.send_message(message.chat.id, "Выбери действие:", reply_markup=markup)
         bot.register_next_step_handler(message, handle_action)
-    elif message.text == 'Выбор урока пук':
+    elif message.text == 'Выбор урока ':
         show_lessons(message)
     elif message.text == 'Назад':
         handle_back(message)
