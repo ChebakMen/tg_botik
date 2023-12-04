@@ -13,22 +13,22 @@ lessons = {
         'title': 'Introduction to Python',
         'images': ['lesson_1_ter_kar_1.jpg', 'lesson_1_ter_kar_2.jpg'],
         'task': 'lesson_1_task.jpg',
-        'answer': 'lesson_1_answer.jpg',
-        'code': 'Hello world',
+        'answer': 'lesson_1_otv.jpg',
+        'code': 'hallo word',
     },
     '2': {
         'title': 'Working with Lists in Python',
         'images': ['lesson_1_ter_kar_3.jpg', 'lesson_1_ter_kar_4.jpg'],
         'task': 'lesson_1_task.jpg',
-        'answer': 'lesson_2_answer.jpg',
-        'code': 'Hello world',
+        'answer': 'lesson_2_otv.jpg',
+        'code': 'dogs',
     },
     '3': {
         'title': 'след хуйня',
         'images': ['lesson_1_ter_kar_3.jpg', 'lesson_1_ter_kar_4.jpg'],
         'task': 'lesson_1_task.jpg',
-        'answer': 'lesson_2_answer.jpg',
-        'code': 'Hello world', #####################################################################
+        'answer': 'lesson_3_otv.jpg',
+        'code': 'cats', #####################################################################
     },
     # Add more lessons as needed
 }
@@ -173,26 +173,37 @@ def handle_next_lesson(message):
         handle_back(message)
 
 
-
 def handle_user_code(message):
-   
-    user_code = message.text
-    
     try:
+        lesson_number = user_state.get((message.chat.id, 'lesson_number'))
+        if lesson_number is None:
+            bot.send_message(message.chat.id, "Error: Lesson number not found.")
+            handle_back(message)
+            return
+
+        lesson_info = lessons.get(str(lesson_number))
+        if lesson_info is None:
+            bot.send_message(message.chat.id, "Error: Lesson information not found.")
+            handle_back(message)
+            return
+
+        expected_code = lesson_info.get('code')
+        if expected_code is None:
+            bot.send_message(message.chat.id, "Error: Expected code not found.")
+            handle_back(message)
+            return
+
+        user_code = message.text
+
+        # Compare the user's code with the expected code
+
         # Установка ограничения времени выполнения и объема памяти
         process = subprocess.run(['python', '-c', user_code], capture_output=True, text=True, timeout=5)
         if process.returncode != 0:
             raise Exception(f"Произошла ошибка при выполнении кода. Код завершился с кодом возврата {process.returncode}.")
 
-        user_state[(message.chat.id, 'handle_lesson_number')] = lesson_number 
-        lesson_info = lessons[lesson_number]
-
-        
         # Проверка результата выполнения кода
-        
-
-        expected_output = lesson_info['code']##############################################################
-        if expected_output in process.stdout:
+        if expected_code in process.stdout:
             bot.send_message(message.chat.id, "Код выполнен верно!")
             show_answer(message)
         else:
@@ -205,6 +216,7 @@ def handle_user_code(message):
         # Если произошла ошибка при выполнении кода, сообщаем об этом пользователю
         bot.send_message(message.chat.id, f"Произошла ошибка при выполнении кода:\n{str(e)}")
         show_buttons(message)
+
 
 def show_buttons(message):
     user_state[message.chat.id] = 'show_buttons'
@@ -222,15 +234,38 @@ def handle_buttons_after_code(message):
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки на клавиатуре.")
 
 def show_answer(message):
-    user_state[message.chat.id] = 'show_answer'
-    
-    # Replace this with your logic to show the answer (e.g., sending an image)
-    bot.send_photo(message.chat.id, open('lesson_1_otv.jpg', 'rb'))
+    try:
+        lesson_number = user_state.get((message.chat.id, 'lesson_number'))
+        if lesson_number is None:
+            bot.send_message(message.chat.id, "Error: Lesson number not found.")
+            handle_back(message)
+            return
 
-    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.row('Далее', 'Назад')
-    bot.send_message(message.chat.id, "Выбери действие:", reply_markup=markup)
-    bot.register_next_step_handler(message, handle_buttons_after_answer)
+        lesson_info = lessons.get(str(lesson_number))
+        if lesson_info is None:
+            bot.send_message(message.chat.id, "Error: Lesson information not found.")
+            handle_back(message)
+            return
+
+        answer_image_path = lesson_info.get('answer')
+        if answer_image_path is None:
+            bot.send_message(message.chat.id, "Error: Answer image not found.")
+            handle_back(message)
+            return
+
+        # Replace this with your logic to show the answer image
+        answer_image = open(answer_image_path, 'rb')
+        bot.send_photo(message.chat.id, answer_image)
+
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        markup.row('Далее', 'Назад')
+        bot.send_message(message.chat.id, "Выбери действие:", reply_markup=markup)
+        bot.register_next_step_handler(message, handle_buttons_after_answer)
+
+    except Exception as e:
+        # Handle any exceptions that may occur during the process
+        bot.send_message(message.chat.id, f"Error while showing answer:\n{str(e)}")
+        handle_back(message)
 
 def handle_buttons_after_answer(message):
     if message.text == 'Далее':
