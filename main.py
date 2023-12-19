@@ -38,14 +38,14 @@ conn.close()
 
 lessons_cpp = { #########################################################    Нужно изменить ответы на вопросы
     '1': {
-        'title': 'Introduction to C++',
+        'title': 'Первые шаги с С++',
         'images': ['cpp/lesson_1_ter_kar_1.jpg', 'cpp/lesson_1_ter_kar_2.jpg'],
         'task': 'cpp/lesson_1_task.jpg',
         'answer': 'cpp/lesson_1_otv.jpg',
         'code': 'Hello, World!',
     },
     '2': {
-        'title': 'Working with Arrays in C++',
+        'title': 'Переменные',
         'images': ['cpp/lesson_2_ter_kar.jpg'],
         'task': 'cpp/lesson_2_task.jpg',
         'answer': 'cpp/lesson_2_otv.jpg',
@@ -56,21 +56,21 @@ lessons_cpp = { #########################################################    Н�
 
 lessons_py = {
     '1': {
-        'title': 'Introduction to Python',
+        'title': 'Ввод и вывод',
         'images': ['py/lesson_1_ter_kar.jpg'],
         'task': 'py/lesson_1_task.jpg',
         'answer': 'py/lesson_1_otv.jpg',
-        'code': 'Hallo, world',
+        'code': 'Hello, {} , you are {} year old',
     },
     '2': {
-        'title': 'Working with Lists in Python',
+        'title': 'Переменные',
         'images': ['py/lesson_2_ter_kar.jpg'],
         'task': 'py/lesson_2_task.jpg',
         'answer': 'py/lesson_2_otv.jpg',
-        'code': 'dogs',
+        'code': '345 2.1 Your name',
     },
     '3': {
-        'title': 'Python',
+        'title': 'Операции с числами',
         'images': ['py/lesson_3_ter_kar.jpg'],
         'task': 'py/lesson_3_task.jpg',
         'answer': 'py/lesson_3_otv.jpg',
@@ -118,7 +118,7 @@ def handle_buttons(message):
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки на клавиатуре.")
 
-#Кнопка Я(информация обо мне)############################################################################    Добавил блок 
+#Кнопка Я(информация обо мне)
 def handle_me(message):
     try:
         user_id = message.from_user.id
@@ -140,7 +140,7 @@ def handle_me(message):
             conn.close()
             return
         elif result and result[0] == 2:
-            bot.send_message(message.chat.id, "Пройденно уроков: 2\n\nВаши достижения: \nНачинающий програмист + !")
+            bot.send_message(message.chat.id, "Пройденно уроков: 2\n\nВаши достижения: \nНачинающий програмист +")
             conn.close()
             return
         elif result and result[0] == 3:
@@ -156,9 +156,6 @@ def handle_me(message):
             conn.close()
             return
         
-
-        
-
     except Exception as e:
         bot.send_message(message.chat.id, "Произошла ошибка в выводе информации")
 
@@ -292,11 +289,11 @@ def show_lesson_pys_py(message):
 
 def handle_lesson_py(message):
 
-    if message.text == 'Урок 1: Introduction to Python':
+    if message.text == 'Урок 1: Ввод и вывод':
         show_lesson_py(message, '1')
-    elif message.text == 'Урок 2: Working with Lists in Python':
+    elif message.text == 'Урок 2: Переменные':
         show_lesson_py(message, '2')
-    elif message.text == 'Урок 3: Python':
+    elif message.text == 'Урок 3: Операции с числами':
         show_lesson_py(message, '3')
     elif message.text == 'Назад':
         handle_back(message)
@@ -503,9 +500,9 @@ def show_lesson_pys_cpp(message):
     bot.register_next_step_handler(message, handle_lesson_cpp)
 
 def handle_lesson_cpp(message):
-    if message.text == 'Урок 1: Introduction to C++':
+    if message.text == 'Урок 1: Первые шаги с С++':
         show_lesson_cpp(message, '1')
-    elif message.text == 'Урок 2: Working with Arrays in C++':
+    elif message.text == 'Урок 2: Переменные':
         show_lesson_cpp(message, '2')  
     elif message.text == 'Назад':
         handle_back(message)
