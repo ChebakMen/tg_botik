@@ -19,12 +19,13 @@ user_state = {}
 conn = sqlite3.connect('users.db')
 cursor = conn.cursor()
 
-# Создание таблицы пользователей
+# Создание таблицы пользователей     #########################################################    Изменил базу добавил 1 строчку
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY,
         username TEXT,
-        premka INTEGER
+        premka INTEGER,
+        lessons INTEGER
     )
 ''')
 
@@ -35,7 +36,7 @@ conn.commit()
 conn.close()
 
 
-lessons_cpp = {
+lessons_cpp = { #########################################################    Нужно изменить ответы на вопросы
     '1': {
         'title': 'Introduction to C++',
         'images': ['cpp/lesson_1_ter_kar_1.jpg', 'cpp/lesson_1_ter_kar_2.jpg'],
@@ -69,7 +70,7 @@ lessons_py = {
         'code': 'dogs',
     },
     '3': {
-        'title': 'Python',##################################################################
+        'title': 'Python',
         'images': ['py/lesson_3_ter_kar.jpg'],
         'task': 'py/lesson_3_task.jpg',
         'answer': 'py/lesson_3_otv.jpg',
@@ -81,7 +82,7 @@ lessons_py = {
 
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start'])#
 def handle_start(message):
     user_id = message.chat.id
     username = message.from_user.username if message.from_user.username else message.from_user.first_name
@@ -90,9 +91,9 @@ def handle_start(message):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT OR IGNORE INTO users (user_id, username, premka)
-        VALUES (?, ?, ?)
-    ''', (user_id, username, 0))  # По умолчанию начинаем с первого урока
+        INSERT OR IGNORE INTO users (user_id, username, premka, lessons)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, username, 0, 0))  # По умолчанию начинаем с первого урока
     conn.commit()
     conn.close()
 
@@ -111,11 +112,56 @@ def handle_buttons(message):
     elif message.text == 'ТП':
         handle_buy(message)
     elif message.text == 'Я':
-        bot.send_message(message.chat.id, "Функционал этой кнопки еще не реализован.")
+        handle_me(message)
     elif message.text == 'Назад':
         handle_back(message)
     else:
         bot.send_message(message.chat.id, "Пожалуйста, используйте кнопки на клавиатуре.")
+
+#Кнопка Я(информация обо мне)############################################################################    Добавил блок 
+def handle_me(message):
+    try:
+        user_id = message.from_user.id
+        first_name = message.chat.first_name
+        username = message.chat.username
+
+        bot.send_message(message.chat.id, f"{first_name} ({username})")
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT lessons FROM users WHERE user_id=?', (user_id,))
+        result = cursor.fetchone()
+
+        if result and result[0] == 0:
+            bot.send_message(message.chat.id, "Вы не прошли не один урок.\n\nВаши достижения: \nПока что нет, но вы не растраивайтесь!")
+            conn.close()
+            return
+        elif result and result[0] == 1:
+            bot.send_message(message.chat.id, "Пройденно уроков: 1\n\nВаши достижения: \nНачинающий программист!")
+            conn.close()
+            return
+        elif result and result[0] == 2:
+            bot.send_message(message.chat.id, "Пройденно уроков: 2\n\nВаши достижения: \nНачинающий програмист + !")
+            conn.close()
+            return
+        elif result and result[0] == 3:
+            bot.send_message(message.chat.id, "Пройденно уроков: 3\n\nВаши достижения: \nНачинающий програмист ++")
+            conn.close()
+            return
+        elif result and result[0] == 4:
+            bot.send_message(message.chat.id, "Пройденно уроков: 3\n\nВаши достижения: \nНачинающий програмист +++")
+            conn.close()
+            return
+        elif result and result[0] == 5:
+            bot.send_message(message.chat.id, "Пройденно уроков: 3\n\nВаши достижения: \nПрограмист")
+            conn.close()
+            return
+        
+
+        
+
+    except Exception as e:
+        bot.send_message(message.chat.id, "Произошла ошибка в выводе информации")
+
 
 
 def handle_buy(message):
@@ -348,6 +394,16 @@ def handle_user_code_py(message):
         # Проверка результата выполнения кода
         if expected_code in process.stdout:
             bot.send_message(message.chat.id, "Код выполнен верно!")
+            
+           
+            ##################################################################################   Добавил чтобы увеличивался урок
+            user_id = message.from_user.id
+            conn = sqlite3.connect('users.db')
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET lessons = lessons + 1 WHERE user_id = ?", (user_id,))
+            conn.commit()
+    
+            ####################################################################
             show_answer_py(message)
         else:
             bot.send_message(message.chat.id, "Код выполнен, но результат не соответствует ожидаемому.")
@@ -523,6 +579,15 @@ def handle_user_code_cpp(message):
         # Проверка результата выполнения кода
         if expected_code in process.stdout:
             bot.send_message(message.chat.id, "Код выполнен верно!")
+            
+##################################################################################   Добавил чтобы увеличивался урок
+            user_id = message.from_user.id
+            conn = sqlite3.connect('users.db')
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET lessons = lessons + 1 WHERE user_id = ?", (user_id,))
+            conn.commit()
+##################################################################################   Добавил чтобы увеличивался урок
+            
             show_answer_cpp(message)
         else:
             bot.send_message(message.chat.id, "Код выполнен, но результат не соответствует ожидаемому.")
